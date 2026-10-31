@@ -33,12 +33,16 @@
   .laden svg { width: 140px; height: 46px; }
   .laden .naam { font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
   .laden p { margin: 0; color: var(--zacht); font-size: 15px; }
+  .laden .slogan { color: var(--tekst); font-size: 19px; font-style: italic; margin: 2px 0 10px; }
   .laden a { color: var(--accent); }
   .lijn { fill: none; stroke: var(--lijn); stroke-width: 10; stroke-linecap: round; }
   .glas { fill: var(--glas); stroke: var(--lijn); stroke-width: 10; }
   .boon { fill: var(--boon); }
   .nerf { fill: none; stroke: var(--nerf); stroke-width: 5; stroke-linecap: round; }
   /* De app zelf, schermvullend binnen de veilige zone van de iPhone */
+  /* De app blijft onzichtbaar tot hij geladen is, zodat het laadscherm (met slogan) even te zien is */
+  iframe { opacity: 0; transition: opacity .35s ease; }
+  iframe.zichtbaar { opacity: 1; }
   iframe { position: fixed; border: 0; background: transparent;
            top: env(safe-area-inset-top); bottom: env(safe-area-inset-bottom);
            left: env(safe-area-inset-left); right: env(safe-area-inset-right);
@@ -56,6 +60,7 @@
     <g transform="translate(58 0) rotate(12)"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 -3 C-9 11 9 -9 24 3"></path></g>
   </svg>
   <div class="naam">Eyes &amp; Beans</div>
+  <p class="slogan" id="slogan">Eerst koffie, dan zien we wel.</p>
   <p>Even geduld, de app wordt geladen…</p>
   <p><a id="direct" href="#">Blijft dit scherm staan? Open de app direct</a></p>
 </div>
@@ -65,7 +70,16 @@
 <script>
   // Het adres van de web-app (Apps Script, eindigt op /exec).
   var APP = 'https://script.google.com/macros/s/AKfycbxHiCPRrQeP8_PsJu9SLqdmtlXPU2bLezYV--xXiUtr9FBOzgQyqV65iiBWamSLOvqS/exec';
-  document.getElementById('app').src = APP + location.search;
+
+  // Toon de app zodra hij geladen is, maar laat het laadscherm minstens 1,5 seconde staan.
+  var app = document.getElementById('app');
+  var start = Date.now();
+  function toonApp() { app.classList.add('zichtbaar'); }
+  app.addEventListener('load', function () {
+    setTimeout(toonApp, Math.max(0, 1500 - (Date.now() - start)));
+  });
+  setTimeout(toonApp, 15000); // vangnet als er geen load-signaal komt
+  app.src = APP + location.search;
   document.getElementById('direct').href = APP;
 </script>
 </body>
