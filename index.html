@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eyes &amp; Beans</title>
+<meta name="description" content="Koffie turven op de afdeling.">
+<meta name="apple-mobile-web-app-title" content="Eyes &amp; Beans">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F6F1EB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1714" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root {
+    --bg: #F6F1EB; --tekst: #2B2118; --zacht: #6E5E50; --accent: #6F4E37;
+    --lijn: #3B2A20; --glas: #FFFDF9; --boon: #6F4E37; --nerf: #F3E3CF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1C1714; --tekst: #F3ECE4; --zacht: #B9A99A; --accent: #D9A877;
+      --lijn: #F3ECE4; --glas: #2A221D; --boon: #D9A877; --nerf: #2A221D;
+    }
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tekst);
+               font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  /* Laadscherm: zichtbaar tot de app zelf in beeld komt */
+  .laden { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
+           justify-content: center; gap: 14px; padding: 24px; text-align: center; }
+  .laden svg { width: 140px; height: 46px; }
+  .laden .naam { font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .laden p { margin: 0; color: var(--zacht); font-size: 15px; }
+  .laden a { color: var(--accent); }
+  .lijn { fill: none; stroke: var(--lijn); stroke-width: 10; stroke-linecap: round; }
+  .glas { fill: var(--glas); stroke: var(--lijn); stroke-width: 10; }
+  .boon { fill: var(--boon); }
+  .nerf { fill: none; stroke: var(--nerf); stroke-width: 5; stroke-linecap: round; }
+  /* De app zelf, schermvullend binnen de veilige zone van de iPhone */
+  iframe { position: fixed; border: 0; background: transparent;
+           top: env(safe-area-inset-top); bottom: env(safe-area-inset-bottom);
+           left: env(safe-area-inset-left); right: env(safe-area-inset-right);
+           width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
+           height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+</style>
+</head>
+<body>
+<div class="laden">
+  <svg viewBox="-130 -42 260 84" aria-hidden="true">
+    <path class="lijn" d="M-104 -10 L-122 -24 M104 -10 L122 -24 M-16 -8 Q0 -22 16 -8"></path>
+    <ellipse class="glas" cx="-58" cy="0" rx="44" ry="33"></ellipse>
+    <ellipse class="glas" cx="58" cy="0" rx="44" ry="33"></ellipse>
+    <g transform="translate(-58 0) rotate(-12)"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 3 C-9 -9 9 11 24 -3"></path></g>
+    <g transform="translate(58 0) rotate(12)"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 -3 C-9 11 9 -9 24 3"></path></g>
+  </svg>
+  <div class="naam">Eyes &amp; Beans</div>
+  <p>Even geduld, de app wordt geladen…</p>
+  <p><a id="direct" href="#">Blijft dit scherm staan? Open de app direct</a></p>
+</div>
+
+<iframe id="app" title="Eyes &amp; Beans"></iframe>
+
+<script>
+  // Het adres van de web-app (Apps Script, eindigt op /exec).
+  var APP = 'https://script.google.com/macros/s/AKfycbxHiCPRrQeP8_PsJu9SLqdmtlXPU2bLezYV--xXiUtr9FBOzgQyqV65iiBWamSLOvqS/exec';
+  document.getElementById('app').src = APP + location.search;
+  document.getElementById('direct').href = APP;
+</script>
+</body>
+</html>
