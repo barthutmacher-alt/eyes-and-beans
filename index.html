@@ -32,9 +32,10 @@
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tekst);
                font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
 
-  /* Laadscherm: direct het logo, daarna vloeit de slogan in twee stappen in */
+  /* Laadscherm: direct het logo, dan schuift "Eerst koffie," van links in,
+     daarna "dan zien we wel." van rechts, en tot slot knipoogt de rechter boon. */
   .laden { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
-           justify-content: center; padding: 24px; text-align: center; }
+           justify-content: center; padding: 24px; text-align: center; overflow: hidden; }
   .laden svg { width: 168px; height: 54px; }
   .naam { margin: 14px 0 0; font: 700 20px/1.2 Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
           letter-spacing: 3px; text-transform: uppercase; }
@@ -46,14 +47,25 @@
 
   .slogan { margin: 28px 0 0; min-height: 2.5em; font-family: Fraunces, Georgia, "Times New Roman", serif;
             font-style: italic; font-weight: 500; font-size: 27px; line-height: 1.25; }
-  .slogan span { display: block; opacity: 0; transform: translateY(12px); filter: blur(4px);
-                 animation: invloeien .9s cubic-bezier(.2, .7, .2, 1) forwards; }
-  .slogan .stap1 { animation-delay: 1s; }   /* "Eerst koffie," na 1 seconde */
-  .slogan .stap2 { animation-delay: 2s; }   /* "dan zien we wel." na 2 seconden */
-  @keyframes invloeien { to { opacity: 1; transform: none; filter: none; } }
+  .slogan span { display: block; opacity: 0; filter: blur(3px);
+                 animation: inschuiven .9s cubic-bezier(.2, .7, .2, 1) forwards; }
+  .slogan .stap1 { transform: translateX(-56px); animation-delay: 1s; }   /* "Eerst koffie," van links, na 1 seconde */
+  .slogan .stap2 { transform: translateX(56px); animation-delay: 2s; }    /* "dan zien we wel." van rechts, na 2 seconden */
+  @keyframes inschuiven { to { opacity: 1; transform: none; filter: none; } }
   @keyframes verschijnen { to { opacity: 1; } }
+
+  /* Knipoog van de rechter boon, na de slogan (3,2 s). De bril kantelt daarbij heel even. */
+  .laden svg { animation: kantel .8s ease-in-out 3.2s both; }
+  .knipoog { transform-box: fill-box; transform-origin: center; animation: dicht .8s ease-in-out 3.2s both; }
+  .ooglid { fill: none; stroke: var(--boon); stroke-width: 7; stroke-linecap: round; opacity: 0;
+            animation: lid .8s ease-in-out 3.2s both; }
+  @keyframes dicht { 0%, 100% { transform: scaleY(1); } 30%, 70% { transform: scaleY(0); } }
+  @keyframes lid { 0%, 22%, 78%, 100% { opacity: 0; } 32%, 68% { opacity: 1; } }
+  @keyframes kantel { 0%, 100% { transform: none; } 35%, 65% { transform: rotate(-4deg); } }
+
   @media (prefers-reduced-motion: reduce) {
-    .slogan span { transform: none; filter: none; animation-name: verschijnen; animation-duration: .4s; }
+    .slogan .stap1, .slogan .stap2 { transform: none; filter: none; animation-name: verschijnen; animation-duration: .4s; }
+    .laden svg, .knipoog, .ooglid { animation: none; }
   }
 
   /* Noodlink onderaan, klein; komt pas als het laden lang duurt */
@@ -81,7 +93,10 @@
     <ellipse class="glas" cx="-58" cy="0" rx="44" ry="33"></ellipse>
     <ellipse class="glas" cx="58" cy="0" rx="44" ry="33"></ellipse>
     <g transform="translate(-58 0) rotate(-12)"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 3 C-9 -9 9 11 24 -3"></path></g>
-    <g transform="translate(58 0) rotate(12)"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 -3 C-9 11 9 -9 24 3"></path></g>
+    <g transform="translate(58 0) rotate(12)">
+      <g class="knipoog"><ellipse class="boon" rx="28" ry="19"></ellipse><path class="nerf" d="M-24 -3 C-9 11 9 -9 24 3"></path></g>
+      <path class="ooglid" d="M-24 -2 Q0 12 24 -2"></path>
+    </g>
   </svg>
   <p class="naam">Eyes <span class="amp">&amp;</span> Beans</p>
   <p class="slogan"><span class="stap1">Eerst koffie,</span><span class="stap2">dan zien we wel.</span></p>
@@ -94,9 +109,11 @@
   // Het adres van de web-app (Apps Script, eindigt op /exec).
   var APP = 'https://script.google.com/macros/s/AKfycbxHiCPRrQeP8_PsJu9SLqdmtlXPU2bLezYV--xXiUtr9FBOzgQyqV65iiBWamSLOvqS/exec';
 
-  // Hoe lang het laadscherm minstens blijft staan: logo, na 1 s "Eerst koffie,",
-  // na 2 s "dan zien we wel." en die nog even laten lezen.
-  var MIN_MS = 3200;
+  // Hoe lang het laadscherm minstens blijft staan: logo, na 1 s "Eerst koffie," (van links),
+  // na 2 s "dan zien we wel." (van rechts), van 3,2 tot 4 s de knipoog, dan de app.
+  // Wie op de telefoon "minder beweging" aan heeft, krijgt geen knipoog en is sneller binnen.
+  var MIN_MS = 4200;
+  try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) MIN_MS = 3000; } catch (e) {}
   var NOODLINK_NA_MS = 6000;   // pas dan de kleine link onderaan tonen
   var VANGNET_MS = 15000;      // app sowieso tonen, ook zonder load-signaal
 
