@@ -100,6 +100,51 @@
   var NOODLINK_NA_MS = 6000;   // pas dan de kleine link onderaan tonen
   var VANGNET_MS = 15000;      // app sowieso tonen, ook zonder load-signaal
 
+  // Onthouden: je naam, je inlog voor Mijn overzicht en "Zelfde als vorige keer".
+  // De app draait hieronder als ingesloten venster van Google; wat dat venster bewaart,
+  // gooit Safari weg zodra je de app sluit. Daarom bewaart deze pagina het zelf.
+  // De app vraagt het op ("hallo") en meldt elke wijziging ("bewaar").
+  var OPSLAG = 'ebOnthouden';
+  var GOOGLE = /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/;   // alleen het app-venster van Apps Script
+  function leesOpslag() {
+    try { var o = JSON.parse(localStorage.getItem(OPSLAG) || 'null'); return o && typeof o === 'object' ? o : {}; }
+    catch (e) { return {}; }
+  }
+  function schrijfOpslag(o) { try { localStorage.setItem(OPSLAG, JSON.stringify(o)); } catch (e) {} }
+  function schoneKeuze(v) {
+    if (!v || typeof v !== 'object') return null;
+    var uit = {}, n = 0;
+    Object.keys(v).slice(0, 30).forEach(function (d) {
+      var a = Math.floor(Number(v[d]));
+      if (d.length <= 60 && a >= 1 && a <= 10) { uit[d] = a; n++; }
+    });
+    return n ? uit : null;
+  }
+  var opslag = leesOpslag();
+  window.addEventListener('message', function (e) {
+    if (!GOOGLE.test(e.origin) || !e.source) return;
+    var d = e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.eb === 'hallo') {
+      e.source.postMessage({ eb: 'opslag', ik: opslag.ik || '', mijn: opslag.mijn || null, vorige: opslag.vorige || null }, e.origin);
+    } else if (d.eb === 'bewaar') {
+      var m = d.mijn;
+      opslag = {
+        ik: typeof d.ik === 'string' ? d.ik.slice(0, 60) : '',
+        mijn: m && typeof m.naam === 'string' && /^[0-9a-f]{32}$/.test(String(m.token || ''))
+          ? { naam: m.naam.slice(0, 60), token: m.token } : null,
+        vorige: schoneKeuze(d.vorige),
+      };
+      schrijfOpslag(opslag);
+    }
+  });
+  // Het adres van de app, met je naam erbij als die bekend is (dan staat hij er meteen).
+  function adres() {
+    var q = location.search.replace(/^\?/, '');
+    if (opslag.ik && !/(^|&)ik=/.test(q)) q += (q ? '&' : '') + 'ik=' + encodeURIComponent(opslag.ik);
+    return APP + (q ? '?' + q : '');
+  }
+
   var app = document.getElementById('app');
   var start = Date.now();
   var getoond = false;
@@ -109,8 +154,8 @@
   });
   setTimeout(function () { if (!getoond) document.getElementById('nood').classList.add('zichtbaar'); }, NOODLINK_NA_MS);
   setTimeout(toonApp, VANGNET_MS);
-  app.src = APP + location.search;
-  document.getElementById('direct').href = APP + location.search;
+  app.src = adres();
+  document.getElementById('direct').href = adres();
 </script>
 </body>
 </html>
