@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F6F1EB" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1C1714" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#15110E" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -20,32 +20,44 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,500&amp;family=Poppins:wght@700&amp;display=swap" media="print" onload="this.media='all'">
 <style>
   :root {
-    --bg: #F6F1EB; --tekst: #2B2118; --zacht: #6E5E50; --amp: #8C5C33;
+    --bg: #F6F1EB; --tekst: #2B2118; --zacht: #6E5E50; --amp: #8C5C33; --goud: #B5793F; --gloed: rgba(181, 121, 63, .16);
     --lijn: #3B2A20; --glas: #FFFDF9; --boon: #6F4E37; --nerf: #F3E3CF;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1C1714; --tekst: #F3ECE4; --zacht: #B9A99A; --amp: #D9A877;
-      --lijn: #F3ECE4; --glas: #2A221D; --boon: #D9A877; --nerf: #2A221D;
+      --bg: #15110E; --tekst: #F3ECE4; --zacht: #B9A99A; --amp: #D9A877; --goud: #D9A877; --gloed: rgba(217, 168, 119, .16);
+      --lijn: #F3ECE4; --glas: #251E19; --boon: #D9A877; --nerf: #251E19;
     }
   }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tekst);
                font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
 
+  /* Bonenregen bovenaan: vult het bovenste deel van het scherm en vloeit naar onderen weg.
+     De bonen komen zacht in beeld en zakken tijdens het laden heel langzaam een stukje. */
+  .bonen { position: fixed; top: 0; left: 0; right: 0; height: 66vh; min-height: 420px; overflow: hidden; pointer-events: none;
+           -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 52%, transparent 96%); mask-image: linear-gradient(transparent, #000 9%, #000 52%, transparent 96%);
+           animation: bonenIn 1s ease-out both, zakken 6s cubic-bezier(.2, .6, .3, 1) both; }
+  .bonen svg { display: block; width: 100%; height: 100%; }
+  @keyframes bonenIn { from { opacity: 0; } }
+  @keyframes zakken { from { transform: translateY(-16px); } }
+  .gloed { position: fixed; left: -20%; right: -20%; top: 44vh; height: 40vh; pointer-events: none;
+           background: radial-gradient(closest-side, var(--gloed), transparent); }
+
   /* Laadscherm: direct het logo, dan schuift "Eerst koffie," van links in,
      daarna "dan zien we wel." van rechts, en tot slot knipoogt de rechter boon. */
   .laden { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
-           justify-content: center; padding: 24px; text-align: center; overflow: hidden; }
-  .laden svg { width: 168px; height: 54px; }
+           justify-content: flex-start; padding: 57vh 24px 24px; box-sizing: border-box; text-align: center; overflow: hidden; }
+  .laden svg { width: 150px; height: 48px; }
   .naam { margin: 14px 0 0; font: 700 20px/1.2 Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
           letter-spacing: 3px; text-transform: uppercase; }
   .naam .amp { color: var(--amp); }
+  .streep { width: 36px; height: 1.5px; margin: 20px auto 0; background: var(--goud); opacity: .6; }
   .lijn { fill: none; stroke: var(--lijn); stroke-width: 10; stroke-linecap: round; }
   .glas { fill: var(--glas); stroke: var(--lijn); stroke-width: 10; }
   .boon { fill: var(--boon); }
   .nerf { fill: none; stroke: var(--nerf); stroke-width: 5; stroke-linecap: round; }
 
-  .slogan { margin: 28px 0 0; min-height: 2.5em; font-family: Fraunces, Georgia, "Times New Roman", serif;
+  .slogan { margin: 18px 0 0; min-height: 2.5em; font-family: Fraunces, Georgia, "Times New Roman", serif;
             font-style: italic; font-weight: 500; font-size: 27px; line-height: 1.25; }
   .slogan span { display: block; opacity: 0; filter: blur(3px);
                  animation: inschuiven .9s cubic-bezier(.2, .7, .2, 1) forwards; }
@@ -66,7 +78,9 @@
   @media (prefers-reduced-motion: reduce) {
     .slogan .stap1, .slogan .stap2 { transform: none; filter: none; animation-name: verschijnen; animation-duration: .4s; }
     .laden svg, .knipoog, .ooglid { animation: none; }
+    .bonen { animation: bonenIn .4s ease-out both; }
   }
+  @media (max-height: 600px) { .laden { padding-top: 50vh; } .slogan { font-size: 23px; } }
 
   /* Noodlink onderaan, klein; komt pas als het laden lang duurt */
   .nood { position: fixed; left: 0; right: 0; bottom: calc(20px + env(safe-area-inset-bottom));
@@ -87,6 +101,41 @@
 </style>
 </head>
 <body>
+<div class="gloed" aria-hidden="true"></div>
+<div class="bonen" id="bonen" aria-hidden="true"></div>
+<script>
+  // Getekende koffiebonen (altijd dezelfde plek), met diepte: grote bonen vooraan en kleine achteraan iets onscherp.
+  (function () {
+    var w = 390, h = 560, seed = 21, items = [];
+    function rnd() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+    for (var i = 0; i < 46; i++) {
+      var s = (0.55 + Math.pow(rnd(), 1.3) * 1.15) * 1.05;
+      items.push({ x: -25 + rnd() * (w + 50), y: -20 + 470 * Math.pow(rnd(), 1.45), s: s, rot: rnd() * 360, nerf: rnd() > 0.3, t: rnd() });
+    }
+    items.sort(function (a, b) { return a.s - b.s; });
+    var defs = '<defs>' +
+      '<radialGradient id="b1" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#A9724D"/><stop offset=".45" stop-color="#704429"/><stop offset="1" stop-color="#341D12"/></radialGradient>' +
+      '<radialGradient id="b2" cx=".36" cy=".3" r=".85"><stop offset="0" stop-color="#93603F"/><stop offset=".5" stop-color="#5E3822"/><stop offset="1" stop-color="#2B170E"/></radialGradient>' +
+      '<filter id="sch" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>' +
+      '<filter id="f1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>' +
+      '<filter id="f3" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>' +
+      '<filter id="f5" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.6"/></filter></defs>';
+    var g = items.map(function (b) {
+      var f = b.s > 1.45 ? 'f5' : b.s > 1.3 ? 'f3' : b.s < 0.7 ? 'f1' : '';
+      return '<g transform="translate(' + (b.x + 5 * b.s) + ' ' + (b.y + 9 * b.s) + ') rotate(' + b.rot + ') scale(' + b.s + ')">' +
+        '<ellipse rx="31" ry="20" fill="#1A0F09" opacity=".38" filter="url(#sch)"/></g>' +
+        '<g transform="translate(' + b.x + ' ' + b.y + ') rotate(' + b.rot + ') scale(' + b.s + ')"' + (f ? ' filter="url(#' + f + ')"' : '') + '>' +
+        '<path d="M-31 0C-31-13-17-21.5 0-21.5S31-12.5 31 0 17 21.5 0 21.5-31 13-31 0Z" fill="url(#' + (b.t > .5 ? 'b1' : 'b2') + ')"/>' +
+        (b.nerf
+          ? '<path d="M-27 3.5C-17-6.5-7 8.5 3 -.5S20-7.5 28-3.5" fill="none" stroke="#1A0D06" stroke-width="3.6" stroke-linecap="round"/>' +
+            '<path d="M-26 7C-16-3-6 12 4 3S20-4 27 0" fill="none" stroke="#D49A6A" stroke-opacity=".28" stroke-width="1.4" stroke-linecap="round"/>'
+          : '<path d="M-22 -1C-10 -7 10 -7 22 -1" fill="none" stroke="#E2AE80" stroke-opacity=".16" stroke-width="5" stroke-linecap="round"/>') +
+        '<ellipse cx="-9" cy="-11" rx="13" ry="4.2" fill="#FFF3E6" opacity=".15" transform="rotate(-10)"/></g>';
+    }).join('');
+    document.getElementById('bonen').innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMin slice">' + defs + g + '</svg>';
+  })();
+</script>
 <div class="laden">
   <svg viewBox="-130 -42 260 84" role="img" aria-label="Logo Eyes &amp; Beans">
     <path class="lijn" d="M-104 -10 L-122 -24 M104 -10 L122 -24 M-16 -8 Q0 -22 16 -8"></path>
@@ -99,6 +148,7 @@
     </g>
   </svg>
   <p class="naam">Eyes <span class="amp">&amp;</span> Beans</p>
+  <div class="streep" aria-hidden="true"></div>
   <p class="slogan"><span class="stap1">Eerst koffie,</span><span class="stap2">dan zien we wel.</span></p>
 </div>
 <p class="nood" id="nood">Laadt het niet? <a id="direct" href="#">Open direct</a></p>
