@@ -34,21 +34,21 @@
 
   /* Bonenregen bovenaan: vult het bovenste deel van het scherm en vloeit naar onderen weg.
      De bonen komen zacht in beeld en zakken tijdens het laden heel langzaam een stukje. */
-  .bonen { position: fixed; top: 0; left: 0; right: 0; height: 66vh; min-height: 420px; overflow: hidden; pointer-events: none;
-           -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 52%, transparent 96%); mask-image: linear-gradient(transparent, #000 9%, #000 52%, transparent 96%);
+  .bonen { position: fixed; top: 0; left: 0; right: 0; height: 58vh; min-height: 380px; overflow: hidden; pointer-events: none;
+           -webkit-mask-image: linear-gradient(transparent, #000 7%, #000 42%, transparent 82%); mask-image: linear-gradient(transparent, #000 7%, #000 42%, transparent 82%);
            animation: bonenIn 1s ease-out both, zakken 6s cubic-bezier(.2, .6, .3, 1) both; }
   .bonen svg { display: block; width: 100%; height: 100%; }
   @keyframes bonenIn { from { opacity: 0; } }
   @keyframes zakken { from { transform: translateY(-16px); } }
-  .gloed { position: fixed; left: -20%; right: -20%; top: 44vh; height: 40vh; pointer-events: none;
+  .gloed { position: fixed; left: -20%; right: -20%; top: 34vh; height: 42vh; pointer-events: none;
            background: radial-gradient(closest-side, var(--gloed), transparent); }
 
   /* Laadscherm: direct het logo, dan schuift "Eerst koffie," van links in,
      daarna "dan zien we wel." van rechts, en tot slot knipoogt de rechter boon. */
   .laden { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
-           justify-content: flex-start; padding: 57vh 24px 24px; box-sizing: border-box; text-align: center; overflow: hidden; }
-  .laden svg { width: 150px; height: 48px; }
-  .naam { margin: 14px 0 0; font: 700 20px/1.2 Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+           justify-content: flex-start; padding: 45vh 24px 24px; box-sizing: border-box; text-align: center; overflow: hidden; }
+  .laden svg { width: 190px; height: 61px; }
+  .naam { margin: 16px 0 0; font: 700 24px/1.2 Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
           letter-spacing: 3px; text-transform: uppercase; }
   .naam .amp { color: var(--amp); }
   .streep { width: 36px; height: 1.5px; margin: 20px auto 0; background: var(--goud); opacity: .6; }
@@ -58,7 +58,7 @@
   .nerf { fill: none; stroke: var(--nerf); stroke-width: 5; stroke-linecap: round; }
 
   .slogan { margin: 18px 0 0; min-height: 2.5em; font-family: Fraunces, Georgia, "Times New Roman", serif;
-            font-style: italic; font-weight: 500; font-size: 27px; line-height: 1.25; }
+            font-style: italic; font-weight: 500; font-size: 32px; line-height: 1.25; }
   .slogan span { display: block; opacity: 0; filter: blur(3px);
                  animation: inschuiven .9s cubic-bezier(.2, .7, .2, 1) forwards; }
   .slogan .stap1 { transform: translateX(-56px); animation-delay: 1s; }   /* "Eerst koffie," van links, na 1 seconde */
@@ -80,7 +80,7 @@
     .laden svg, .knipoog, .ooglid { animation: none; }
     .bonen { animation: bonenIn .4s ease-out both; }
   }
-  @media (max-height: 600px) { .laden { padding-top: 50vh; } .slogan { font-size: 23px; } }
+  @media (max-height: 600px) { .bonen { height: 48vh; min-height: 0; } .laden { padding-top: 38vh; } .laden svg { width: 160px; height: 52px; } .naam { font-size: 21px; } .slogan { font-size: 26px; } }
 
   /* Noodlink onderaan, klein; komt pas als het laden lang duurt */
   .nood { position: fixed; left: 0; right: 0; bottom: calc(20px + env(safe-area-inset-bottom));
@@ -110,7 +110,7 @@
     function rnd() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
     for (var i = 0; i < 46; i++) {
       var s = (0.55 + Math.pow(rnd(), 1.3) * 1.15) * 1.05;
-      items.push({ x: -25 + rnd() * (w + 50), y: -20 + 470 * Math.pow(rnd(), 1.45), s: s, rot: rnd() * 360, nerf: rnd() > 0.3, t: rnd() });
+      items.push({ x: -25 + rnd() * (w + 50), y: -20 + 380 * Math.pow(rnd(), 1.45), s: s, rot: rnd() * 360, nerf: rnd() > 0.3, t: rnd() });
     }
     items.sort(function (a, b) { return a.s - b.s; });
     var defs = '<defs>' +
