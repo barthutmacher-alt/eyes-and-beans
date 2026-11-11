@@ -232,6 +232,23 @@
   setTimeout(toonApp, VANGNET_MS);
   app.src = adres();
   document.getElementById('direct').href = adres();
+
+  // Terug in de app na een tijdje weg (app op de achtergrond, telefoon op slot): de app opnieuw laden,
+  // zodat prijzen, namen, betaallinks en een nieuwe mededeling kloppen. Even het logo, geen hele animatie.
+  var VERVERS_NA_MS = 30 * 60000;
+  var wegSinds = 0;
+  function herlaad() {
+    getoond = false;
+    app.classList.remove('zichtbaar');
+    start = Date.now() - MIN_MS + 600;
+    app.src = adres();
+    setTimeout(function () { if (!getoond) toonApp(); }, VANGNET_MS);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { wegSinds = Date.now(); return; }
+    if (wegSinds && getoond && Date.now() - wegSinds >= VERVERS_NA_MS) herlaad();
+    wegSinds = 0;
+  });
 </script>
 </body>
 </html>
